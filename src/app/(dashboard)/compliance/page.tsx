@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,23 +9,53 @@ import {
     Filter,
     Download,
     Eye,
-    Lock,
     History,
     AlertTriangle,
-    UserCheck
+    UserCheck,
+    Loader2
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-
-const auditLogs = [
-    { id: "1", user: "Dr. Michael Vance", action: "Accessed Patient Record", resource: "MRN-1001 (John Smith)", time: "2m ago", status: "SUCCESS" },
-    { id: "2", user: "Nurse Sarah Wilson", action: "Updated Vitals", resource: "MRN-1002", time: "15m ago", status: "SUCCESS" },
-    { id: "3", user: "System Admin", action: "Modified Triage Rule", resource: "Rule #42 (Criticality)", time: "1h ago", status: "SUCCESS" },
-    { id: "4", user: "Unknown IP (45.1.2.3)", action: "Failed Login Attempt", resource: "Auth Service", time: "3h ago", status: "FAILED" },
-    { id: "5", user: "Dr. Michael Vance", action: "Exported Clinical Summary", resource: "MRN-1015", time: "5h ago", status: "SUCCESS" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { createClient } from "@/lib/supabase/client";
+import { formatDistanceToNow, format } from "date-fns";
+import { useState } from "react";
 
 export default function CompliancePage() {
+    const supabase = createClient();
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const { data: rawLogs, isLoading } = useQuery({
+        queryKey: ["compliance-audit-logs"],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from("audit_logs")
+                .select(`
+                    *,
+                    user:profiles(full_name, role)
+                `)
+                .order("created_at", { ascending: false })
+                .limit(100);
+
+            if (error) throw error;
+            return data;
+        },
+    });
+
+    const auditLogs = rawLogs?.filter(log => {
+        if (!searchQuery) return true;
+        const query = searchQuery.toLowerCase();
+        const userName = (log.user as any)?.full_name || "System";
+        return (
+            userName.toLowerCase().includes(query) ||
+            log.action.toLowerCase().includes(query) ||
+            log.resource.toLowerCase().includes(query)
+        );
+    }) || [];
+
+    const totalEvents = rawLogs?.length || 0;
+    const flagsCount = auditLogs.filter(l => l.action === 'FAILED' || (l.new_value as any)?.severity === 'CRITICAL').length;
+
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-20">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -61,8 +93,8 @@ export default function CompliancePage() {
                                 <History className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Total Events (24h)</p>
-                                <p className="text-xl font-bold text-white">1,429</p>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Total Events (Live)</p>
+                                <p className="text-xl font-bold text-white">{isLoading ? "..." : totalEvents}</p>
                             </div>
                         </div>
                     </CardContent>
@@ -74,8 +106,8 @@ export default function CompliancePage() {
                                 <AlertTriangle className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Flags Raised</p>
-                                <p className="text-xl font-bold text-white">2 Pending</p>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Total Flags</p>
+                                <p className="text-xl font-bold text-white">{isLoading ? "..." : flagsCount}</p>
                             </div>
                         </div>
                     </CardContent>
@@ -86,7 +118,12 @@ export default function CompliancePage() {
                 <div className="flex flex-col md:flex-row gap-4">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input placeholder="Search users, actions, or resources..." className="pl-10 bg-card/50 border-border/50 h-11 rounded-xl" />
+                        <Input
+                            placeholder="Search users, actions, or resources..."
+                            className="pl-10 bg-card/50 border-border/50 h-11 rounded-xl"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                     </div>
                     <Button variant="outline" className="h-11 border-border/50 bg-card/50 text-white gap-2 px-4 rounded-xl">
                         <Filter className="w-4 h-4" />
@@ -101,42 +138,78 @@ export default function CompliancePage() {
                                 <th className="px-6 py-4">User/Entity</th>
                                 <th className="px-6 py-4">Action</th>
                                 <th className="px-6 py-4">Target Resource</th>
-                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4">IP Address</th>
                                 <th className="px-6 py-4">Timestamp</th>
                                 <th className="px-6 py-4 text-right">Details</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/30">
-                            {auditLogs.map((log) => (
-                                <tr key={log.id} className="hover:bg-secondary/20 transition-colors">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-white">
-                                                {log.user.split(' ').map(n => n[0]).join('')}
-                                            </div>
-                                            <span className="font-medium text-white">{log.user}</span>
+                            {isLoading ? (
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <tr key={i} className="animate-pulse">
+                                        <td className="px-6 py-4"><div className="h-8 w-32 bg-secondary/50 rounded-lg" /></td>
+                                        <td className="px-6 py-4"><div className="h-6 w-24 bg-secondary/50 rounded-lg" /></td>
+                                        <td className="px-6 py-4"><div className="h-6 w-20 bg-secondary/50 rounded-lg" /></td>
+                                        <td className="px-6 py-4"><div className="h-6 w-16 bg-secondary/50 rounded-lg" /></td>
+                                        <td className="px-6 py-4 text-right"><div className="h-8 w-8 bg-secondary/50 rounded-lg ml-auto" /></td>
+                                    </tr>
+                                ))
+                            ) : auditLogs.length > 0 ? (
+                                auditLogs.map((log) => {
+                                    const user = log.user as any;
+                                    const userName = user?.full_name || "System";
+                                    return (
+                                        <tr key={log.id} className="hover:bg-secondary/20 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-white">
+                                                        {userName.split(' ').map((n: string) => n[0]).join('')}
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-medium text-white">{userName}</span>
+                                                        <span className="text-[10px] text-muted-foreground uppercase">{user?.role || "System"}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <Badge variant="outline" className={cn(
+                                                    "text-[10px] h-5 px-1.5",
+                                                    log.action === "CREATE" && "border-emerald-500/30 text-emerald-500 bg-emerald-500/5",
+                                                    log.action === "UPDATE" && "border-sky-500/30 text-sky-500 bg-sky-500/5",
+                                                    log.action === "DELETE" && "border-rose-500/30 text-rose-500 bg-rose-500/5",
+                                                    log.action === "FAILED" && "border-amber-500/30 text-amber-500 bg-amber-500/5",
+                                                )}>
+                                                    {log.action}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <code className="text-[10px] bg-secondary/50 px-2 py-1 rounded text-primary border border-primary/20">{log.resource}</code>
+                                            </td>
+                                            <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{log.ip_address || 'Local/Internal'}</td>
+                                            <td className="px-6 py-4 text-muted-foreground whitespace-nowrap">
+                                                <div className="flex flex-col">
+                                                    <span>{formatDistanceToNow(new Date(log.created_at))} ago</span>
+                                                    <span className="text-[10px] opacity-70">{format(new Date(log.created_at), "HH:mm:ss")}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white rounded-lg">
+                                                    <Eye className="w-4 h-4" />
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            ) : (
+                                <tr>
+                                    <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <History className="w-12 h-12 opacity-20" />
+                                            <p>No audit logs found matching your criteria.</p>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-muted-foreground">{log.action}</td>
-                                    <td className="px-6 py-4">
-                                        <code className="text-[10px] bg-secondary/50 px-2 py-1 rounded text-primary border border-primary/20">{log.resource}</code>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <Badge variant="outline" className={cn(
-                                            "text-[10px] h-5 px-1.5",
-                                            log.status === "SUCCESS" ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/5" : "border-rose-500/30 text-rose-500 bg-rose-500/5"
-                                        )}>
-                                            {log.status}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-6 py-4 text-muted-foreground">{log.time}</td>
-                                    <td className="px-6 py-4 text-right">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white rounded-lg">
-                                            <Eye className="w-4 h-4" />
-                                        </Button>
-                                    </td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
                 </div>
