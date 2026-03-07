@@ -5,12 +5,47 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { dashboardNavItems } from "@/config/navigation";
-import { Dna, LogOut } from "lucide-react";
+import { Dna, LogOut, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Sidebar() {
     const pathname = usePathname();
+    const router = useRouter();
+    const supabase = createClient();
+    const queryClient = useQueryClient();
+    const { profile, initials, isLoading: isProfileLoading } = useAuth();
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+    const filteredNavItems = dashboardNavItems.filter((item) => {
+        if (!item.roles) return true;
+        const userRole = profile?.role?.toUpperCase();
+        return userRole && item.roles.includes(userRole);
+    });
+
+    const handleLogout = async () => {
+        try {
+            setIsLoggingOut(true);
+            const { error } = await supabase.auth.signOut();
+            if (error) throw error;
+
+            // Clear all queries to prevent stale profile data for next user
+            queryClient.clear();
+
+            router.push("/login");
+            toast.success("Logged out successfully");
+        } catch (error: any) {
+            toast.error(error.message || "Failed to logout");
+        } finally {
+            setIsLoggingOut(false);
+        }
+    };
 
     return (
         <div className="hidden border-r bg-card/50 backdrop-blur-xl lg:block w-64 h-screen fixed">
@@ -23,7 +58,7 @@ export function Sidebar() {
                 </div>
 
                 <div className="flex-1 px-4 mt-8 space-y-1">
-                    {dashboardNavItems.map((item) => {
+                    {filteredNavItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = pathname === item.href;
 
@@ -48,22 +83,30 @@ export function Sidebar() {
                     <Separator className="mb-4 bg-border/50" />
                     <div className="p-2 mb-4 bg-secondary/30 rounded-xl border border-border/50">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-                                <span className="text-sm font-bold text-primary">JD</span>
+                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 shrink-0">
+                                <span className="text-sm font-bold text-primary">
+                                    {isProfileLoading ? "..." : initials}
+                                </span>
                             </div>
                             <div className="flex flex-col min-w-0">
-                                <span className="text-sm font-medium text-white truncate">Dr. Jane Doe</span>
-                                <Badge variant="secondary" className="w-fit h-4 text-[10px] px-1 py-0 bg-primary/10 text-primary border-primary/20">
-                                    DOCTOR
+                                <span className="text-sm font-medium text-white truncate">
+                                    {isProfileLoading ? "Loading..." : profile?.full_name || "User"}
+                                </span>
+                                <Badge variant="secondary" className="w-fit h-4 text-[10px] px-1 py-0 bg-primary/10 text-primary border-primary/20 uppercase tracking-tighter">
+                                    {isProfileLoading ? "ROLE" : profile?.role || "GUEST"}
                                 </Badge>
                             </div>
                         </div>
-                        <button className={cn(
-                            buttonVariants({ variant: "ghost", size: "sm" }),
-                            "w-full justify-start gap-2 mt-4 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                        )}>
-                            <LogOut className="w-4 h-4" />
-                            Logout
+                        <button
+                            onClick={handleLogout}
+                            disabled={isLoggingOut}
+                            className={cn(
+                                buttonVariants({ variant: "ghost", size: "sm" }),
+                                "w-full justify-start gap-2 mt-4 text-muted-foreground hover:text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                            )}
+                        >
+                            {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                            {isLoggingOut ? "Logging out..." : "Logout"}
                         </button>
                     </div>
                 </div>

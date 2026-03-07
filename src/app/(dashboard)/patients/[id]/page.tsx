@@ -1,5 +1,7 @@
 "use client"
 
+import { Button } from "@/components/ui/button";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,10 +13,27 @@ import {
     ClipboardList,
     FileText,
     ShieldAlert,
+    User,
     Droplet,
     Thermometer,
     Heart,
-    Wind
+    Wind,
+    ShieldCheck,
+    FlaskConical,
+    Microscope,
+    AlertTriangle,
+    Info,
+    Zap,
+    Scale,
+    CheckCircle2,
+    FileType,
+    Download,
+    Eye,
+    History,
+    Stethoscope,
+    Pill,
+    Image,
+    AlertCircle
 } from "lucide-react";
 import Link from "next/link";
 import { BodyMap3D } from "@/components/clinical/body-map-3d";
@@ -242,14 +261,268 @@ export default function PatientDetailsPage({ params }: { params: { id: string } 
                     <BodyMap3D patientId={params.id} />
                 </TabsContent>
 
-                <TabsContent value="genomic">
-                    <Card className="bg-card/30 border-border/50 p-12 text-center">
-                        <Dna className="w-12 h-12 text-primary mx-auto mb-4 opacity-50" />
-                        <h3 className="text-xl font-bold text-white mb-2">Genomic Profile: {patient.first_name}</h3>
-                        <p className="text-muted-foreground max-w-md mx-auto">
-                            Automatic risk assessment based on genomic sequencing is currently in development.
-                        </p>
+                <TabsContent value="genomic" className="space-y-8 animate-in fade-in duration-500">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* 1. Genetic Risk Profile */}
+                        <Card className="lg:col-span-2 bg-card/30 border-border/50">
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle className="text-white text-lg flex items-center gap-2">
+                                    <Dna className="w-5 h-5 text-primary" />
+                                    Genomic Risk Profile
+                                </CardTitle>
+                                <Badge variant="outline" className="border-primary/30 text-primary">Next-Gen Sequencing V2.1</Badge>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {[
+                                        { gene: "BRCA1", variation: "Wild Type", risk: "Low", status: "Negative", color: "emerald" },
+                                        { gene: "APOE4", variation: "ε3/ε4", risk: "Moderate", status: "Carrier", color: "amber" },
+                                        { gene: "F5", variation: "Leiden Mutant", risk: "High", status: "Heterozygous", color: "rose" },
+                                        { gene: "MTHFR", variation: "C677T", risk: "Moderate", status: "Homozygous", color: "amber" },
+                                    ].map((g, i) => (
+                                        <div key={i} className="p-4 rounded-2xl border border-border/50 bg-secondary/10 flex justify-between items-center">
+                                            <div>
+                                                <div className="text-sm font-bold text-white">{g.gene}</div>
+                                                <div className="text-[10px] text-muted-foreground uppercase">{g.variation}</div>
+                                            </div>
+                                            <Badge className={cn(
+                                                "capitalize",
+                                                g.color === "emerald" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
+                                                    g.color === "amber" ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
+                                                        "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                                            )} variant="outline">
+                                                {g.risk} Risk
+                                            </Badge>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 flex gap-4">
+                                    <Info className="w-5 h-5 text-primary shrink-0 mt-1" />
+                                    <p className="text-xs text-muted-foreground leading-relaxed">
+                                        Patient shows a <span className="text-white font-medium">Factor V Leiden Mutation</span>, suggesting an increased risk for venous thromboembolism. Prophylactic measures advised for surgeries or long-duration travel.
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* 2. Pharmacogenomics */}
+                        <Card className="bg-card/30 border-border/50">
+                            <CardHeader>
+                                <CardTitle className="text-white text-lg flex items-center gap-2">
+                                    <FlaskConical className="w-5 h-5 text-emerald-400" />
+                                    Drug Metabolism
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {[
+                                    { drug: "Warfarin", marker: "CYP2C9", metabolic: "Slow", color: "rose" },
+                                    { drug: "Statins", marker: "SLCO1B1", metabolic: "Normal", color: "emerald" },
+                                    { drug: "Clopidogrel", marker: "CYP2C19", metabolic: "Intermediate", color: "amber" },
+                                    { drug: "Codeine", marker: "CYP2D6", metabolic: "Ultra-Fast", color: "purple" },
+                                ].map((p, i) => (
+                                    <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-border/30">
+                                        <div>
+                                            <div className="text-sm font-medium text-white">{p.drug}</div>
+                                            <div className="text-[10px] text-muted-foreground">{p.marker}</div>
+                                        </div>
+                                        <div className={cn(
+                                            "px-2 py-1 rounded-lg text-[10px] font-bold uppercase",
+                                            p.color === "rose" && "bg-rose-500/10 text-rose-500",
+                                            p.color === "emerald" && "bg-emerald-500/10 text-emerald-500",
+                                            p.color === "amber" && "bg-amber-500/10 text-amber-500",
+                                            p.color === "purple" && "bg-purple-500/10 text-purple-500",
+                                        )}>
+                                            {p.metabolic}
+                                        </div>
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+
+                        {/* 3. Advanced Allergy Screening */}
+                        <Card className="bg-card/30 border-border/50 lg:col-span-3">
+                            <CardHeader>
+                                <CardTitle className="text-white text-lg flex items-center gap-2">
+                                    <ShieldAlert className="w-5 h-5 text-rose-500" />
+                                    Advanced Sensitivity Analysis
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                    {[
+                                        { allergen: "Penicillin", type: "Drug", level: "92 IU/mL", severity: "CRITICAL", trend: "increasing" },
+                                        { allergen: "Peanuts", type: "Food", level: "45 IU/mL", severity: "HIGH", trend: "stable" },
+                                        { allergen: "Latex", type: "Contact", level: "12 IU/mL", severity: "MODERATE", trend: "decreasing" },
+                                        { allergen: "Dust Mites", type: "Environmental", level: "8 IU/mL", severity: "LOW", trend: "stable" },
+                                    ].map((a, i) => (
+                                        <div key={i} className="relative group p-5 rounded-3xl border border-border/50 hover:border-primary/30 transition-all overflow-hidden">
+                                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                                <AlertTriangle className="w-12 h-12" />
+                                            </div>
+                                            <div className="text-[10px] font-bold text-muted-foreground uppercase mb-1">{a.type}</div>
+                                            <div className="text-lg font-extrabold text-white mb-2">{a.allergen}</div>
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <Badge className={cn(
+                                                    "text-[10px]",
+                                                    a.severity === "CRITICAL" ? "bg-rose-500 text-white" :
+                                                        a.severity === "HIGH" ? "bg-amber-500 text-white" :
+                                                            "bg-secondary/50 text-muted-foreground"
+                                                )}>
+                                                    {a.severity}
+                                                </Badge>
+                                                <span className="text-[10px] text-muted-foreground">{a.level}</span>
+                                            </div>
+                                            <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                <div
+                                                    className={cn(
+                                                        "h-full rounded-full transition-all duration-1000",
+                                                        a.severity === "CRITICAL" ? "bg-rose-500" :
+                                                            a.severity === "HIGH" ? "bg-amber-500" :
+                                                                "bg-emerald-500"
+                                                    )}
+                                                    style={{ width: `${a.severity === "CRITICAL" ? 95 : a.severity === "HIGH" ? 70 : 35}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="timeline" className="animate-in fade-in duration-500">
+                    <Card className="bg-card/30 border-border/50">
+                        <CardHeader>
+                            <CardTitle className="text-white text-lg flex items-center gap-2">
+                                <History className="w-5 h-5 text-primary" />
+                                Clinical History & Timeline
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
+                                {[
+                                    {
+                                        date: "Oct 24, 2023",
+                                        time: "14:30",
+                                        title: "Telemedicine Consultation",
+                                        description: "Follow-up for hypertension management. BP steady at 125/82. Prescription renewed.",
+                                        type: "visit",
+                                        status: "completed",
+                                        icon: Stethoscope,
+                                        color: "sky"
+                                    },
+                                    {
+                                        date: "Oct 12, 2023",
+                                        time: "09:15",
+                                        title: "Lab Results: Genomic Panel",
+                                        description: "Full sequencing results available. Identified Factor V Leiden mutation. Genetic counseling scheduled.",
+                                        type: "lab",
+                                        status: "critical",
+                                        icon: FlaskConical,
+                                        color: "rose"
+                                    },
+                                    {
+                                        date: "Sep 28, 2023",
+                                        time: "11:00",
+                                        title: "Prescription Issued",
+                                        description: "Lisinopril 10mg once daily. Started as primary treatment for stage 1 hypertension.",
+                                        type: "pharmacy",
+                                        status: "active",
+                                        icon: Pill,
+                                        color: "emerald"
+                                    },
+                                    {
+                                        date: "Sep 15, 2023",
+                                        time: "10:00",
+                                        title: "Initial Specialist Consultation",
+                                        description: "Primary cardiology assessment. Patient presenting with chronic fatigue and mild palpitations.",
+                                        type: "visit",
+                                        status: "completed",
+                                        icon: User,
+                                        color: "purple"
+                                    }
+                                ].map((item, i) => (
+                                    <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                                        <div className="flex items-center justify-center w-10 h-10 rounded-full border border-border/50 bg-slate-900 text-primary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-transform group-hover:scale-110">
+                                            <item.icon className="w-5 h-5" />
+                                        </div>
+                                        <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-border/50 bg-secondary/10 group-hover:bg-secondary/20 transition-all">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <time className="font-mono text-[10px] font-bold text-primary uppercase">{item.date} • {item.time}</time>
+                                                <Badge className={cn(
+                                                    "text-[8px] px-1.5 py-0",
+                                                    item.status === 'completed' && "bg-emerald-500/10 text-emerald-500",
+                                                    item.status === 'critical' && "bg-rose-500/10 text-rose-500 animate-pulse",
+                                                    item.status === 'active' && "bg-sky-500/10 text-sky-500",
+                                                )} variant="outline">{item.status}</Badge>
+                                            </div>
+                                            <div className="text-sm font-bold text-white mb-1">{item.title}</div>
+                                            <div className="text-xs text-muted-foreground leading-relaxed">{item.description}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
                     </Card>
+                </TabsContent>
+
+                <TabsContent value="docs" className="animate-in fade-in duration-500">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[
+                            { name: "MRI_Brain_Scan_2023.pdf", type: "Imaging", date: "Oct 25, 2023", size: "12.4 MB", icon: Image, color: "sky" },
+                            { name: "Genomic_Sequence_Final.json", type: "Lab Report", date: "Oct 12, 2023", size: "450 KB", icon: FlaskConical, color: "rose" },
+                            { name: "Cardiac_Consult_Notes.pdf", type: "Clinical Note", date: "Sep 15, 2023", size: "1.2 MB", icon: FileText, color: "purple" },
+                            { name: "Blood_Panel_Comprehensive.pdf", type: "Lab Result", date: "Aug 30, 2023", size: "850 KB", icon: FlaskConical, color: "emerald" },
+                            { name: "Discharge_Summary_V1.pdf", type: "Clinical Note", date: "July 22, 2023", size: "2.1 MB", icon: ClipboardList, color: "amber" },
+                            { name: "Insurance_Auth_Primary.pdf", type: "Administrative", date: "July 15, 2023", size: "540 KB", icon: ShieldCheck, color: "slate" },
+                        ].map((doc, i) => (
+                            <Card key={i} className="bg-card/30 border-border/50 hover:border-primary/30 transition-all group overflow-hidden">
+                                <CardContent className="p-4">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className={cn(
+                                            "w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110",
+                                            doc.color === "sky" && "bg-sky-500/10 text-sky-500",
+                                            doc.color === "rose" && "bg-rose-500/10 text-rose-500",
+                                            doc.color === "purple" && "bg-purple-500/10 text-purple-500",
+                                            doc.color === "emerald" && "bg-emerald-500/10 text-emerald-500",
+                                            doc.color === "amber" && "bg-amber-500/10 text-amber-500",
+                                            doc.color === "slate" && "bg-slate-500/10 text-slate-500",
+                                        )}>
+                                            <doc.icon className="w-6 h-6" />
+                                        </div>
+                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-white hover:bg-white/10">
+                                                <Eye className="w-4 h-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-white hover:bg-white/10">
+                                                <Download className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="text-[10px] font-bold text-muted-foreground uppercase mb-1">{doc.type}</div>
+                                        <div className="text-sm font-bold text-white truncate mb-1">{doc.name}</div>
+                                        <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                                            <span>{doc.date}</span>
+                                            <span>{doc.size}</span>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                                <div className="h-1 w-full bg-slate-800 absolute bottom-0">
+                                    <div className={cn(
+                                        "h-full rounded-r-full transition-all duration-500 w-0 group-hover:w-full",
+                                        doc.color === "sky" && "bg-sky-500",
+                                        doc.color === "rose" && "bg-rose-500",
+                                        doc.color === "purple" && "bg-purple-500",
+                                        doc.color === "emerald" && "bg-emerald-500",
+                                        doc.color === "amber" && "bg-amber-500",
+                                        doc.color === "slate" && "bg-slate-500",
+                                    )} />
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
                 </TabsContent>
             </Tabs>
         </div>

@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     Users,
@@ -16,7 +17,20 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-const settingGroups = [
+interface SettingItem {
+    label: string;
+    icon: any;
+    desc: string;
+    badge?: string;
+}
+
+interface SettingGroup {
+    title: string;
+    description: string;
+    items: SettingItem[];
+}
+
+const settingGroups: SettingGroup[] = [
     {
         title: "Account & Profile",
         description: "Manage your personal information and preferences.",
