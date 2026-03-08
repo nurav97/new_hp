@@ -28,7 +28,8 @@ import {
     Eye,
     Receipt,
     History,
-    FileText
+    FileText,
+    Calendar
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -40,6 +41,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { CreateInvoiceDialog } from "@/components/clinical/create-invoice-dialog";
 
 export default function BillingPage() {
     const supabase = createClient();
@@ -96,10 +98,7 @@ export default function BillingPage() {
                         <Download className="w-4 h-4" />
                         Export
                     </Button>
-                    <Button className="bg-primary hover:bg-primary/90 text-white gap-2 h-11 px-6 rounded-xl shadow-lg shadow-primary/20">
-                        <Plus className="w-4 h-4" />
-                        Create Invoice
-                    </Button>
+                    <CreateInvoiceDialog />
                 </div>
             </div>
 

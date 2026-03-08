@@ -41,7 +41,7 @@ USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('ADMIN'
 
 -- All clinical staff can see invoices for their patients? (Maybe just view, not edit)
 CREATE POLICY "Clinical staff can view patient invoices" ON invoices FOR SELECT 
-USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('AMDMIN', 'DOCTOR', 'NURSE')));
+USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('ADMIN', 'DOCTOR', 'NURSE')));
 
 -- 7. Seed Data (Optional, but helpful for initial load)
 -- Since I don't have patient IDs easily in a script, I'll rely on the UI or manual inserts if needed.
