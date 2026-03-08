@@ -117,7 +117,7 @@ export default function PatientDetailsPage({ params }: { params: { id: string } 
                         <div>
                             <div className="flex items-center gap-3">
                                 <h1 className="text-3xl font-bold text-white">{patient.first_name} {patient.last_name}</h1>
-                                <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 uppercase">{patient.status}</Badge>
+                                <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 uppercase">{patient.intake_status}</Badge>
                             </div>
                             <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                                 <span className="font-mono">{patient.mrn}</span>
@@ -238,7 +238,7 @@ export default function PatientDetailsPage({ params }: { params: { id: string } 
                             <CardContent className="space-y-4">
                                 <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20">
                                     <div className="text-xs font-bold text-primary uppercase">Current Status</div>
-                                    <div className="text-lg font-bold text-white mt-1 capitalize">{patient.status.replace('_', ' ')}</div>
+                                    <div className="text-lg font-bold text-white mt-1 capitalize">{patient.intake_status?.replace('_', ' ') || 'N/A'}</div>
                                     <div className="text-sm text-muted-foreground mt-1">Priority: {patient.priority}</div>
                                 </div>
                                 <div className="space-y-2">
