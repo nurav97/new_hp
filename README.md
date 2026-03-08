@@ -7,33 +7,51 @@ EHCP is a production-grade, fully responsive, and mobile-friendly web applicatio
 ## 📸 Project Showcase
 
 <div align="center">
-  <img src="screen_shots/Screenshot 2026-03-08 132319.png" width="45%" alt="Dashboard" />
-  <img src="screen_shots/Screenshot 2026-03-08 132353.png" width="45%" alt="Patient List" />
+  <img src="screen_shots/Screenshot 2026-03-08 132319.png" width="80%" alt="Dashboard" />
 </div>
 
 <div align="center">
-  <img src="screen_shots/Screenshot 2026-03-08 132413.png" width="45%" alt="Patient Details" />
-  <img src="screen_shots/Screenshot 2026-03-08 132521.png" width="45%" alt="3D Body Map" />
+  <img src="screen_shots/Screenshot 2026-03-08 132353.png" width="80%" alt="Patient List" />
 </div>
 
 <div align="center">
-  <img src="screen_shots/Screenshot 2026-03-08 132609.png" width="45%" alt="Medical Timeline" />
-  <img src="screen_shots/Screenshot 2026-03-08 132639.png" width="45%" alt="Triage Queue" />
+  <img src="screen_shots/Screenshot 2026-03-08 132413.png" width="80%" alt="Patient Details" />
 </div>
 
 <div align="center">
-  <img src="screen_shots/Screenshot 2026-03-08 132659.png" width="45%" alt="Appointments" />
-  <img src="screen_shots/Screenshot 2026-03-08 132719.png" width="45%" alt="Treatment Plans" />
+  <img src="screen_shots/Screenshot 2026-03-08 132521.png" width="80%" alt="3D Body Map" />
 </div>
 
 <div align="center">
-  <img src="screen_shots/Screenshot 2026-03-08 132732.png" width="45%" alt="Invoicing" />
-  <img src="screen_shots/Screenshot 2026-03-08 132754.png" width="45%" alt="Compliance Audit" />
+  <img src="screen_shots/Screenshot 2026-03-08 132609.png" width="80%" alt="Medical Timeline" />
 </div>
 
 <div align="center">
-  <img src="screen_shots/Screenshot 2026-03-08 132834.png" width="45%" alt="Lab Results" />
-  <img src="screen_shots/Screenshot 2026-03-08 132925.png" width="45%" alt="Telemedicine" />
+  <img src="screen_shots/Screenshot 2026-03-08 132639.png" width="80%" alt="Triage Queue" />
+</div>
+
+<div align="center">
+  <img src="screen_shots/Screenshot 2026-03-08 132659.png" width="80%" alt="Appointments" />
+</div>
+
+<div align="center">
+  <img src="screen_shots/Screenshot 2026-03-08 132719.png" width="80%" alt="Treatment Plans" />
+</div>
+
+<div align="center">
+  <img src="screen_shots/Screenshot 2026-03-08 132732.png" width="80%" alt="Invoicing" />
+</div>
+
+<div align="center">
+  <img src="screen_shots/Screenshot 2026-03-08 132754.png" width="80%" alt="Compliance Audit" />
+</div>
+
+<div align="center">
+  <img src="screen_shots/Screenshot 2026-03-08 132834.png" width="80%" alt="Lab Results" />
+</div>
+
+<div align="center">
+  <img src="screen_shots/Screenshot 2026-03-08 132925.png" width="80%" alt="Telemedicine" />
 </div>
 
 ---
